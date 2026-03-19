@@ -3,17 +3,56 @@ import Input from "../../components/input";
 import { useState } from "react";
 import { FiTrash } from "react-icons/fi";
 
+import { db } from "../../services/firebaseconnection";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+
 export default function Admin() {
   const [linkInput, setLinkInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [textColorInput, setTextColorInput] = useState("#fff");
   const [backgroundColorInput, setBackgroundColorInput] = useState("#000");
 
+  async function handleRegister(e: SubmitEvent) {
+    e.preventDefault();
+
+    if(linkInput === "" || urlInput === ""){
+        alert("Preencha todos os campos")
+        return
+    }
+
+    await addDoc(collection(db, "links"),{
+        name: linkInput,
+        url: urlInput,
+        bg: backgroundColorInput,
+        color: textColorInput,
+        created: new Date()
+    })
+    .then(()=>{
+        setLinkInput("")
+        setUrlInput("")
+        console.log("Cadastrado com sucesso!")
+    })
+    .catch((error)=>{
+        console.log(`Erro ao cadastrar no banco: ${error}`)
+    })
+  }
+
   return (
     <div className="flex items-center flex-col min-h-screen pb-7 px-2">
       <Header />
 
-      <form className="flex flex-col mt-8 mb-3 w-full max-w-xl">
+      <form
+        className="flex flex-col mt-8 mb-3 w-full max-w-xl"
+        onSubmit={handleRegister}
+      >
         <label className="text-white font-medium mt-2 mb-2">Link</label>
         <Input
           placeholder="Digite o link"
@@ -78,26 +117,19 @@ export default function Admin() {
         </button>
       </form>
 
-        <h2 className="font-bold text-white mb-4 text-2xl">
-            Menus Links
-        </h2>
+      <h2 className="font-bold text-white mb-4 text-2xl">Menus Links</h2>
 
-        <section 
-            className="flex items-center justify-between w-11/12 max-w-xl rounded py-3 px-2 mb-2 select-none"
-            style={{backgroundColor: "#fff", color:"#000"}}    
-        >
-            <p>Lorem ipsum dolor sit amet</p>
-            <div>
-                <button
-                    className="border border-dashed p-1 rounded bg-neutral-900"
-                >
-                    <FiTrash size={20} color="#fff"/>
-                </button>
-            </div>
-        </section>
-
-
-
+      <section
+        className="flex items-center justify-between w-11/12 max-w-xl rounded py-3 px-2 mb-2 select-none"
+        style={{ backgroundColor: "#fff", color: "#000" }}
+      >
+        <p>Lorem ipsum dolor sit amet</p>
+        <div>
+          <button className="border border-dashed p-1 rounded bg-neutral-900">
+            <FiTrash size={20} color="#fff" />
+          </button>
+        </div>
+      </section>
     </div>
   );
 }
